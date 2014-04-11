@@ -66,7 +66,6 @@ void tempfree(Cell *p) {
 /* #endif */
 
 jmp_buf env;
-int use_arc4 = 1;
 extern	int	pairstack[];
 extern	Awkfloat	srand_seed;
 
@@ -471,9 +470,9 @@ Cell *array(Node **a, int n)	/* a[0] is symtab, a[1] is list of subscripts */
 		s = getsval(y);
 		if (!adjbuf(&buf, &bufsz, strlen(buf)+strlen(s)+nsub+1, recsize, 0, "array"))
 			FATAL("out of memory for %s[%s...]", x->nval, buf);
-		strlcat(buf, s, bufsz);
+		strncat(buf, s, bufsz);
 		if (np->nnext)
-			strlcat(buf, *SUBSEP, bufsz);
+			strncat(buf, *SUBSEP, bufsz);
 		tempfree(y);
 	}
 	if (!isarr(x)) {
@@ -518,9 +517,9 @@ Cell *awkdelete(Node **a, int n)	/* a[0] is symtab, a[1] is list of subscripts *
 			s = getsval(y);
 			if (!adjbuf(&buf, &bufsz, strlen(buf)+strlen(s)+nsub+1, recsize, 0, "awkdelete"))
 				FATAL("out of memory deleting %s[%s...]", x->nval, buf);
-			strlcat(buf, s, bufsz);	
+			strncat(buf, s, bufsz);	
 			if (np->nnext)
-				strlcat(buf, *SUBSEP, bufsz);
+				strncat(buf, *SUBSEP, bufsz);
 			tempfree(y);
 		}
 		freeelem(x, buf);
@@ -557,10 +556,10 @@ Cell *intest(Node **a, int n)	/* a[0] is index (list), a[1] is symtab */
 		s = getsval(x);
 		if (!adjbuf(&buf, &bufsz, strlen(buf)+strlen(s)+nsub+1, recsize, 0, "intest"))
 			FATAL("out of memory deleting %s[%s...]", x->nval, buf);
-		strlcat(buf, s, bufsz);
+		strncat(buf, s, bufsz);
 		tempfree(x);
 		if (p->nnext)
-			strlcat(buf, *SUBSEP, bufsz);
+			strncat(buf, *SUBSEP, bufsz);
 	}
 	k = lookup(buf, (Array *) ap->sval);
 	tempfree(ap);
@@ -1166,8 +1165,8 @@ Cell *cat(Node **a, int q)	/* a[0] cat a[1] */
 	if (s == NULL)
 		FATAL("out of space concatenating %.15s... and %.15s...",
 			x->sval, y->sval);
-	strlcpy(s, x->sval, len);
-	strlcpy(s+n1, y->sval, len - n1);
+	strncpy(s, x->sval, len);
+	strncpy(s+n1, y->sval, len - n1);
 	tempfree(x);
 	tempfree(y);
 	z = gettemp();
@@ -1582,22 +1581,14 @@ Cell *bltin(Node **a, int n)	/* builtin functions. a[0] is type, a[1] is arg lis
 		u = (Awkfloat) system(getsval(x)) / 256;   /* 256 is unix-dep */
 		break;
 	case FRAND:
-		if (use_arc4)
-			u = (Awkfloat)arc4random() / 0xffffffff;
-		else
-			u = (Awkfloat) (random() % RAND_MAX) / RAND_MAX;
+		u = (Awkfloat) (random() % RAND_MAX) / RAND_MAX;
 		break;
 	case FSRAND:
-		if (isrec(x))	/* no argument provided, want arc4random() */
-			use_arc4 = 1;
-		else {
-			use_arc4 = 0;
-			u = getfval(x);
-			tmp = u;
-			srandom((unsigned int) u);
-			u = srand_seed;
-			srand_seed = tmp;
-		}
+		u = getfval(x);
+		tmp = u;
+		srandom((unsigned int) u);
+		u = srand_seed;
+		srand_seed = tmp;
 		break;
 	case FTOUPPER:
 	case FTOLOWER:
