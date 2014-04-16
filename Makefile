@@ -2,13 +2,14 @@
 
 PROG=	awk
 SRCS=	ytab.c lex.c b.c main.c parse.c proctab.c tran.c lib.c run.c
-LDADD=	-lm
+PKG_CONFIG?=	pkg-config
+LDADD=	-lm $(shell $(PKG_CONFIG) --libs lobsder)
 DPADD=	${LIBM}
 CLEANFILES+=proctab.c maketab ytab.c ytab.h
 CURDIR=	$(shell pwd)
 CC?=	cc
 HOSTCC?=	$(CC)
-CFLAGS+=-I. -I${CURDIR} -DHAS_ISBLANK -DNDEBUG
+CFLAGS+=-I. -I${CURDIR} -DHAS_ISBLANK -DNDEBUG $(shell $(PKG_CONFIG) --cflags lobsder)
 HOSTCFLAGS+=-I. -I${CURDIR} -DHAS_ISBLANK -DNDEBUG
 DESTDIR?=
 PREFIX?=/usr
