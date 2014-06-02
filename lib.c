@@ -195,7 +195,7 @@ int readrec(char **pbuf, int *pbufsize, FILE *inf)	/* read one record into buf *
 	if (strlen(*FS) >= sizeof(inputFS))
 		FATAL("field separator %.10s... is too long", *FS);
 	/*fflush(stdout); avoids some buffering problem but makes it 25% slower*/
-	strlcpy(inputFS, *FS, sizeof inputFS);	/* for subsequent field splitting */
+	strncpy(inputFS, *FS, sizeof inputFS);	/* for subsequent field splitting */
 	if ((sep = **RS) == 0) {
 		sep = '\n';
 		while ((c=getc(inf)) == '\n' && c != EOF)	/* skip leading \n's */
@@ -285,7 +285,7 @@ void fldbld(void)	/* create fields from current record */
 	}
 	fr = fields;
 	i = 0;	/* number of fields accumulated here */
-	strlcpy(inputFS, *FS, sizeof(inputFS));
+	strncpy(inputFS, *FS, sizeof(inputFS));
 	if (strlen(inputFS) > 1) {	/* it's a regular expression */
 		i = refldbld(r, inputFS);
 	} else if ((sep = *inputFS) == ' ') {	/* default whitespace */
@@ -455,7 +455,7 @@ int refldbld(const char *rec, const char *fs)	/* build fields from reg expr in F
 			rec = patbeg + patlen;
 		} else {
 			   dprintf( ("no match %s\n", rec) );
-			strlcpy(fr, rec, fields + fieldssize - fr);
+			strncpy(fr, rec, fields + fieldssize - fr);
 			pfa->initstat = tempstat;
 			break;
 		}
