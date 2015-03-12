@@ -27,7 +27,7 @@ ytab.c ytab.h: awkgram.y
 	mv y.tab.h ytab.h
 
 proctab.c: ytab.h maketab.c
-	${HOSTCC} ${HOSTCFLAGS} ${CURDIR}/maketab.c -o $@
+	${HOSTCC} ${HOSTCFLAGS} ${CURDIR}/maketab.c -o maketab
 	./maketab >proctab.c
 
 install: $(PROG)
