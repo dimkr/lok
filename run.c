@@ -1,4 +1,4 @@
-/*	$OpenBSD: run.c,v 1.34 2013/09/29 15:42:25 deraadt Exp $	*/
+/*	$OpenBSD: run.c,v 1.38 2014/12/19 19:28:55 deraadt Exp $	*/
 /****************************************************************
 Copyright (C) Lucent Technologies 1997
 All Rights Reserved
@@ -270,8 +270,8 @@ Cell *call(Node **a, int n)	/* function call.  very kludgy and fragile */
 	fp++;	/* now ok to up frame */
 	if (fp >= frame + nframe) {
 		int dfp = fp - frame;	/* old index */
-		frame = (struct Frame *)
-			realloc((char *) frame, (nframe += 100) * sizeof(struct Frame));
+		frame = reallocarray(frame, (nframe += 100),
+		    sizeof(struct Frame));
 		if (frame == NULL)
 			FATAL("out of space for stack frames in %s", s);
 		fp = frame + dfp;
@@ -470,9 +470,9 @@ Cell *array(Node **a, int n)	/* a[0] is symtab, a[1] is list of subscripts */
 		s = getsval(y);
 		if (!adjbuf(&buf, &bufsz, strlen(buf)+strlen(s)+nsub+1, recsize, 0, "array"))
 			FATAL("out of memory for %s[%s...]", x->nval, buf);
-		strncat(buf, s, bufsz);
+		strlcat(buf, s, bufsz);
 		if (np->nnext)
-			strncat(buf, *SUBSEP, bufsz);
+			strlcat(buf, *SUBSEP, bufsz);
 		tempfree(y);
 	}
 	if (!isarr(x)) {
@@ -517,9 +517,9 @@ Cell *awkdelete(Node **a, int n)	/* a[0] is symtab, a[1] is list of subscripts *
 			s = getsval(y);
 			if (!adjbuf(&buf, &bufsz, strlen(buf)+strlen(s)+nsub+1, recsize, 0, "awkdelete"))
 				FATAL("out of memory deleting %s[%s...]", x->nval, buf);
-			strncat(buf, s, bufsz);	
+			strlcat(buf, s, bufsz);	
 			if (np->nnext)
-				strncat(buf, *SUBSEP, bufsz);
+				strlcat(buf, *SUBSEP, bufsz);
 			tempfree(y);
 		}
 		freeelem(x, buf);
@@ -556,10 +556,10 @@ Cell *intest(Node **a, int n)	/* a[0] is index (list), a[1] is symtab */
 		s = getsval(x);
 		if (!adjbuf(&buf, &bufsz, strlen(buf)+strlen(s)+nsub+1, recsize, 0, "intest"))
 			FATAL("out of memory deleting %s[%s...]", x->nval, buf);
-		strncat(buf, s, bufsz);
+		strlcat(buf, s, bufsz);
 		tempfree(x);
 		if (p->nnext)
-			strncat(buf, *SUBSEP, bufsz);
+			strlcat(buf, *SUBSEP, bufsz);
 	}
 	k = lookup(buf, (Array *) ap->sval);
 	tempfree(ap);
@@ -920,7 +920,7 @@ int format(char **pbuf, int *pbufsize, const char *s, Node *a)	/* printf-like co
 			break;
 		case 'c':
 			if (isnum(x)) {
-				if (getfval(x))
+				if ((int)getfval(x))
 					snprintf(p, buf + bufsize - p, fmt, (int) getfval(x));
 				else {
 					*p++ = '\0'; /* explicit null byte */
@@ -1165,8 +1165,8 @@ Cell *cat(Node **a, int q)	/* a[0] cat a[1] */
 	if (s == NULL)
 		FATAL("out of space concatenating %.15s... and %.15s...",
 			x->sval, y->sval);
-	strncpy(s, x->sval, len);
-	strncpy(s+n1, y->sval, len - n1);
+	strlcpy(s, x->sval, len);
+	strlcpy(s+n1, y->sval, len - n1);
 	tempfree(x);
 	tempfree(y);
 	z = gettemp();
@@ -1584,11 +1584,13 @@ Cell *bltin(Node **a, int n)	/* builtin functions. a[0] is type, a[1] is arg lis
 		u = (Awkfloat) (random() % RAND_MAX) / RAND_MAX;
 		break;
 	case FSRAND:
-		u = getfval(x);
-		tmp = u;
-		srandom((unsigned int) u);
-		u = srand_seed;
-		srand_seed = tmp;
+		if (!isrec(x)) {
+			u = getfval(x);
+			tmp = u;
+			srandom((unsigned int) u);
+			u = srand_seed;
+			srand_seed = tmp;
+		}
 		break;
 	case FTOUPPER:
 	case FTOLOWER:
@@ -1729,7 +1731,7 @@ FILE *openfile(int a, const char *us)
 	if (i >= nfiles) {
 		struct files *nf;
 		int nnf = nfiles + FOPEN_MAX;
-		nf = realloc(files, nnf * sizeof(*nf));
+		nf = reallocarray(files, nnf, sizeof(*nf));
 		if (nf == NULL)
 			FATAL("cannot grow files for %s and %d files", s, nnf);
 		memset(&nf[nfiles], 0, FOPEN_MAX * sizeof(*nf));

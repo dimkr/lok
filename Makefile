@@ -1,7 +1,7 @@
 #	$OpenBSD: Makefile,v 1.13 2013/07/28 18:10:16 miod Exp $
 
 PROG=	awk
-SRCS=	ytab.c lex.c b.c main.c parse.c proctab.c tran.c lib.c run.c
+SRCS=	ytab.c lex.c b.c main.c parse.c proctab.c tran.c lib.c run.c reallocarray.c
 PKG_CONFIG?=	pkg-config
 LDADD=	-lm
 DPADD=	${LIBM}
