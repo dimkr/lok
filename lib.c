@@ -1,4 +1,4 @@
-/*	$OpenBSD: lib.c,v 1.20 2011/09/28 19:27:18 millert Exp $	*/
+/*	$OpenBSD: lib.c,v 1.21 2015/03/27 10:09:30 tobiasu Exp $	*/
 /****************************************************************
 Copyright (C) Lucent Technologies 1997
 All Rights Reserved
@@ -195,7 +195,7 @@ int readrec(char **pbuf, int *pbufsize, FILE *inf)	/* read one record into buf *
 	if (strlen(*FS) >= sizeof(inputFS))
 		FATAL("field separator %.10s... is too long", *FS);
 	/*fflush(stdout); avoids some buffering problem but makes it 25% slower*/
-	strncpy(inputFS, *FS, sizeof inputFS);	/* for subsequent field splitting */
+	strlcpy(inputFS, *FS, sizeof inputFS);	/* for subsequent field splitting */
 	if ((sep = **RS) == 0) {
 		sep = '\n';
 		while ((c=getc(inf)) == '\n' && c != EOF)	/* skip leading \n's */
@@ -285,7 +285,7 @@ void fldbld(void)	/* create fields from current record */
 	}
 	fr = fields;
 	i = 0;	/* number of fields accumulated here */
-	strncpy(inputFS, *FS, sizeof(inputFS));
+	strlcpy(inputFS, *FS, sizeof(inputFS));
 	if (strlen(inputFS) > 1) {	/* it's a regular expression */
 		i = refldbld(r, inputFS);
 	} else if ((sep = *inputFS) == ' ') {	/* default whitespace */
@@ -455,7 +455,7 @@ int refldbld(const char *rec, const char *fs)	/* build fields from reg expr in F
 			rec = patbeg + patlen;
 		} else {
 			   dprintf( ("no match %s\n", rec) );
-			strncpy(fr, rec, fields + fieldssize - fr);
+			strlcpy(fr, rec, fields + fieldssize - fr);
 			pfa->initstat = tempstat;
 			break;
 		}
@@ -648,7 +648,8 @@ void eprint(void)	/* try to print context around error */
 	static int been_here = 0;
 	extern char ebuf[], *ep;
 
-	if (compile_time == 2 || compile_time == 0 || been_here++ > 0)
+	if (compile_time == 2 || compile_time == 0 || been_here++ > 0 ||
+	    ebuf == ep)
 		return;
 	p = ep - 1;
 	if (p > ebuf && *p == '\n')
