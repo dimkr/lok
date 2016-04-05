@@ -1,4 +1,4 @@
-/*	$OpenBSD: main.c,v 1.17 2011/09/28 19:27:18 millert Exp $	*/
+/*	$OpenBSD: main.c,v 1.19 2015/10/22 04:08:17 deraadt Exp $	*/
 /****************************************************************
 Copyright (C) Lucent Technologies 1997
 All Rights Reserved
@@ -32,6 +32,7 @@ const char	*version = "version 20110810";
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 #include "awk.h"
 #include "ytab.h"
 
@@ -62,6 +63,13 @@ int main(int argc, char *argv[])
 
 	setlocale(LC_ALL, "");
 	setlocale(LC_NUMERIC, "C"); /* for parsing cmdline & prog */
+
+	if (pledge("stdio rpath wpath cpath proc exec", NULL) == -1) {
+		fprintf(stderr, "%s: pledge: incorrect arguments\n",
+		    cmdname);
+		exit(1);
+	}
+
 	cmdname = __progname;
 	if (argc == 1) {
 		fprintf(stderr, "usage: %s [-safe] [-V] [-d[n]] [-F fs] "
@@ -147,6 +155,15 @@ int main(int argc, char *argv[])
 		argc--;
 		argv++;
 	}
+
+	if (safe) {
+		if (pledge("stdio rpath", NULL) == -1) {
+			fprintf(stderr, "%s: pledge: incorrect arguments\n",
+			    cmdname);
+			exit(1);
+		}
+	}
+
 	/* argv[1] is now the first argument */
 	if (npfile == 0) {	/* no -f; first argument is program */
 		if (argc <= 1) {

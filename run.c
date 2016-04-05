@@ -1,4 +1,4 @@
-/*	$OpenBSD: run.c,v 1.38 2014/12/19 19:28:55 deraadt Exp $	*/
+/*	$OpenBSD: run.c,v 1.40 2015/12/16 19:44:42 tb Exp $	*/
 /****************************************************************
 Copyright (C) Lucent Technologies 1997
 All Rights Reserved
@@ -1581,16 +1581,20 @@ Cell *bltin(Node **a, int n)	/* builtin functions. a[0] is type, a[1] is arg lis
 		u = (Awkfloat) system(getsval(x)) / 256;   /* 256 is unix-dep */
 		break;
 	case FRAND:
-		u = (Awkfloat) (random() % RAND_MAX) / RAND_MAX;
+		u = (Awkfloat) (random() & RAND_MAX) / ((u_int)RAND_MAX + 1);
 		break;
 	case FSRAND:
-		if (!isrec(x)) {
+		if (isrec(x)) { 	/* no argument provided */
+			u = time(NULL);
+			tmp = u;
+			srandom((unsigned int) u);
+		} else {
 			u = getfval(x);
 			tmp = u;
 			srandom((unsigned int) u);
-			u = srand_seed;
-			srand_seed = tmp;
 		}
+		u = srand_seed;
+		srand_seed = tmp;
 		break;
 	case FTOUPPER:
 	case FTOLOWER:
