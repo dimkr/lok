@@ -1584,14 +1584,14 @@ Cell *bltin(Node **a, int n)	/* builtin functions. a[0] is type, a[1] is arg lis
 		u = (Awkfloat) (random() & RAND_MAX) / ((u_int)RAND_MAX + 1);
 		break;
 	case FSRAND:
-		if (isrec(x)) { 	/* no argument provided */
+		if (isrec(x)) {		/* no argument provided */
 			u = time(NULL);
 			tmp = u;
 			srandom((unsigned int) u);
 		} else {
 			u = getfval(x);
 			tmp = u;
-			srandom((unsigned int) u);
+			srandom_deterministic((unsigned int) u);
 		}
 		u = srand_seed;
 		srand_seed = tmp;
