@@ -64,12 +64,6 @@ int main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 	setlocale(LC_NUMERIC, "C"); /* for parsing cmdline & prog */
 
-	if (pledge("stdio rpath wpath cpath proc exec", NULL) == -1) {
-		fprintf(stderr, "%s: pledge: incorrect arguments\n",
-		    cmdname);
-		exit(1);
-	}
-
 	cmdname = __progname;
 	if (argc == 1) {
 		fprintf(stderr, "usage: %s [-safe] [-V] [-d[n]] [-F fs] "
@@ -154,14 +148,6 @@ int main(int argc, char *argv[])
 		}
 		argc--;
 		argv++;
-	}
-
-	if (safe) {
-		if (pledge("stdio rpath", NULL) == -1) {
-			fprintf(stderr, "%s: pledge: incorrect arguments\n",
-			    cmdname);
-			exit(1);
-		}
 	}
 
 	/* argv[1] is now the first argument */
