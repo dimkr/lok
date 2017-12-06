@@ -45,7 +45,7 @@ typedef union {
 	char	*s;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 49 "y.tab.c"
+#line 49 "ytab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -2558,7 +2558,7 @@ void checkdup(Node *vl, Cell *cp)	/* check if name already in list */
 		}
 	}
 }
-#line 2562 "y.tab.c"
+#line 2562 "ytab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -3355,7 +3355,7 @@ case 184:
 #line 443 "/home/dima/Development/lok/awkgram.y"
 	{ yyval.p = notnull(yystack.l_mark[-1].p); }
 break;
-#line 3359 "y.tab.c"
+#line 3359 "ytab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
