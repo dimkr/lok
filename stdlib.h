@@ -1,7 +1,6 @@
-#ifndef _COMPAT_STDLIB_H_xxx
-#define _COMPAT_STDLIB_H_xxx
+#ifndef _COMPAT_STDLIB_H_
+#define _COMPAT_STDLIB_H_
 
-#undef __need_malloc_and_calloc
 #include_next <stdlib.h>
 
 /*	$OpenBSD: stdlib.h,v 1.72 2017/09/05 03:16:13 schwarze Exp $	*/

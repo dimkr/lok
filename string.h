@@ -37,7 +37,9 @@
  *	@(#)string.h	5.10 (Berkeley) 3/9/91
  */
 
-size_t	 strlcat(char *, const char *, size_t);
-size_t	 strlcpy(char *, const char *, size_t);
+size_t	 strlcat(char *, const char *, size_t)
+		__attribute__ ((__bounded__(__string__,1,3)));
+size_t	 strlcpy(char *, const char *, size_t)
+		__attribute__ ((__bounded__(__string__,1,3)));
 
 #endif /* _STRING_H_ */
